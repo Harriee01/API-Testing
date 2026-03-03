@@ -1,0 +1,117 @@
+name: CI – API Tests
+
+# ── Trigger ───────────────────────────────────────────────────────────────────
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# ── Global permissions (needed for GitHub Pages deployment) ───────────────────
+permissions:
+  contents: read
+  pages:    write
+  id-token: write
+
+# ── Concurrency: cancel in-flight runs for the same ref ──────────────────────
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Job 1: run the test suite
+  # ────────────────────────────────────────────────────────────────────────────
+  test:
+    name: Run REST Assured Tests (Java 21)
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the repository code
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up JDK 21 (Temurin = Eclipse Adoptium LTS build)
+      - name: ☕ Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          # Cache Maven local repository to speed up subsequent runs
+          cache: maven
+
+      # 3. Execute all tests; always continue so report step runs even on failure
+      - name: 🧪 Run tests (mvn clean test)
+        run: mvn --batch-mode --no-transfer-progress clean test
+        # continue-on-error lets the report upload step run even if tests fail
+        continue-on-error: true
+
+      # 4. Upload raw Allure result JSON files as a CI artefact.
+      #    They can be downloaded from the GitHub Actions run summary page.
+      - name: 📦 Upload Allure results
+        if: always()   # upload even when tests fail so we can debug
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ github.run_number }}
+          path: target/allure-results/
+          retention-days: 30   # keep for 30 days then auto-delete
+
+      # 5. Install the Allure CLI so we can generate the HTML report
+      - name: 📥 Install Allure CLI
+        if: always()
+        run: |
+          # Download the official Allure CLI tarball (pinned version for reproducibility)
+          curl -sLo allure.tgz \
+            https://github.com/allure-framework/allure2/releases/download/2.29.0/allure-2.29.0.tgz
+          tar -xzf allure.tgz
+          # Symlink the binary into a directory already on PATH
+          sudo ln -s "$(pwd)/allure-2.29.0/bin/allure" /usr/local/bin/allure
+
+      # 6. Generate the static HTML Allure report from the result files
+      - name: 📊 Generate Allure report
+        if: always()
+        run: |
+          allure generate target/allure-results \
+            --clean \
+            -o target/allure-report
+
+      # 7. Upload the generated HTML report so it can be viewed from GitHub Actions
+      - name: 📤 Upload Allure HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-${{ github.run_number }}
+          path: target/allure-report/
+          retention-days: 30
+
+      # 8. (BONUS) Prepare the report for GitHub Pages deployment
+      - name: 🔧 Setup GitHub Pages
+        if: github.ref == 'refs/heads/main' && always()
+        uses: actions/configure-pages@v4
+
+      - name: 📄 Upload report to GitHub Pages artifact
+        if: github.ref == 'refs/heads/main' && always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/allure-report/
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Job 2: deploy to GitHub Pages (only on pushes to main)
+  # ────────────────────────────────────────────────────────────────────────────
+  deploy-pages:
+    name: Deploy Allure Report to GitHub Pages
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        # After deployment the report is accessible at:
+        # https://<USERNAME>.github.io/<REPO_NAME>/
