@@ -4,14 +4,219 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
-    <artifactId>API-TESTING</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>com.json</groupId>
+    <artifactId>jsonplaceholder-api-tests</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
+    <name>JSONPlaceholder API Automation Suite</name>
+    <description>
+        Production-grade REST Assured automation framework targeting
+        JSONPlaceholder public API. Integrates Allure reporting, and runs in CI via GitHub Actions.
+    </description>
+
+    <!-- Global properties -->
     <properties>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
+        <!-- Encoding -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Java version – targeting 21 (LTS) -->
+        <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+
+        <!-- Library versions -->
+        <rest-assured.version>5.5.0</rest-assured.version>
+        <junit5.version>5.11.4</junit5.version>
+        <allure.version>2.29.0</allure.version>
+        <allure-maven.version>2.14.0</allure-maven.version>
+        <lombok.version>1.18.36</lombok.version>
+        <jackson.version>2.18.2</jackson.version>
+        <assertj.version>3.27.2</assertj.version>
+        <json-schema-validator.version>5.5.0</json-schema-validator.version>
+        <slf4j.version>2.0.16</slf4j.version>
+        <logback.version>1.5.12</logback.version>
+        <faker.version>2.4.1</faker.version>
+
+        <!-- Plugin versions -->
+        <maven-compiler.version>3.13.0</maven-compiler.version>
+        <maven-surefire.version>3.5.2</maven-surefire.version>
+
+        <!-- Allure results directory – referenced by surefire + allure plugin -->
+        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
     </properties>
+
+    <dependencies>
+
+        <!-- REST Assured – core HTTP client DSL-->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>${rest-assured.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- REST Assured JSON Schema Validator – validates response against JSON Schema draft-07 -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>${json-schema-validator.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Jackson – serialize/deserialize POJOs ↔ JSON-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- JUnit 5 – test runner-->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit5.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit5.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit5.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Allure JUnit 5 adapter – bridges JUnit 5 lifecycle with Allure-->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-junit5</artifactId>
+            <version>${allure.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Allure REST Assured filter – auto-attaches requests/responses to report -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-rest-assured</artifactId>
+            <version>${allure.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--Lombok – eliminates boilerplate (getters, builders, etc.) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <!-- provided: needed at compile time only, not at runtime -->
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- AssertJ – fluent, readable assertions -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--JavaFaker – generates realistic random test data -->
+        <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+            <version>${faker.version}</version>
+        </dependency>
+
+        <!-- Logging – SLF4J API + Logback implementation-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <!--  Maven Compiler Plugin – compile with Java 21-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler.version}</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>UTF-8</encoding>
+                    <!-- Lombok requires annotation processing to be active -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
+            <!--Maven Surefire Plugin – executes JUnit tests-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire.version}</version>
+                <configuration>
+                    <!-- Required for JUnit 5 auto-detection of test engine -->
+                    <useModulePath>false</useModulePath>
+                    <systemPropertyVariables>
+                        <!-- Tell allure-junit5 listener where to write results -->
+                        <allure.results.directory>${allure.results.directory}</allure.results.directory>
+                        <!-- Ensure consistent JVM timezone in CI -->
+                        <user.timezone>UTC</user.timezone>
+                    </systemPropertyVariables>
+                    <!-- Include standard test class naming conventions -->
+                    <includes>
+                        <include>**/*Tests.java</include>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <!-- Show full stack traces in console output -->
+                    <trimStackTrace>false</trimStackTrace>
+                </configuration>
+            </plugin>
+
+            <!-- Allure Maven Plugin – generates HTML report from JSON results-->
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>${allure-maven.version}</version>
+                <configuration>
+                    <!-- Point to the same directory surefire writes to -->
+                    <resultsDirectory>${allure.results.directory}</resultsDirectory>
+                    <!-- Allure CLI version used to generate/serve the report -->
+                    <reportVersion>${allure.version}</reportVersion>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
 
 </project>
