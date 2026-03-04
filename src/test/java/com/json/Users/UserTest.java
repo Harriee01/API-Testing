@@ -1,6 +1,6 @@
 package com.json.Users;
 
-import com.json.Base.BaseTest;
+import com.json.base.BaseTest;
 import com.json.Constants.StatusCodes;
 import io.qameta.allure.*;
 import io.restassured.builder.ResponseSpecBuilder;
