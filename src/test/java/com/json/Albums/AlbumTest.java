@@ -1,6 +1,6 @@
 package com.json.Albums;
 
-import com.json.Base.BaseTest;
+import com.json.base.BaseTest;
 import com.json.Constants.StatusCodes;
 import io.qameta.allure.*;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -17,18 +17,17 @@ import static org.hamcrest.Matchers.*;
 /**
  * AlbumTest – integration tests for the {@code /albums} resource.
  *
- * <p>
- * <b>Coverage:</b>
- * <ol>
- * <li>GET /albums → 200, ≥100 items, content-type, schema</li>
- * <li>GET /albums/{id} → 200, all fields present, POJO check</li>
- * <li>GET /albums/{id} → 404 for non-existent id (negative)</li>
- * <li>GET /users/{userId}/albums → 200, 10 albums for user 1</li>
- * <li>POST /albums → 201, echoed fields</li>
- * <li>PUT /albums/{id} → 200, updated title reflected</li>
- * <li>PATCH /albums/{id} → 200, partial update reflected</li>
- * <li>DELETE /albums/{id} → 200, empty response body</li>
- * </ol>
+ * Coverage:
+ *
+ * GET /albums → 200, ≥100 items, content-type, schema
+ * <GET /albums/{id} → 200, all fields present, POJO check
+ * GET /albums/{id} → 404 for non-existent id (negative)
+ * GET /users/{userId}/albums → 200, 10 albums for user 1
+ * POST /albums → 201, echoed fields
+ * PUT /albums/{id} → 200, updated title reflected
+ * PATCH /albums/{id} → 200, partial update reflected
+ * DELETE /albums/{id} → 200, empty response body
+ * <
  */
 @Epic("JSONPlaceholder API")
 @Feature("Albums Resource")
@@ -38,9 +37,8 @@ class AlbumTest extends BaseTest {
 
     private static final Logger log = LoggerFactory.getLogger(AlbumTest.class);
 
-    // ─────────────────────────────────────────────────────────────────────────
+
     // HTTP Step Helpers
-    // ─────────────────────────────────────────────────────────────────────────
 
     @Step("GET all albums")
     private ValidatableResponse getAllAlbums() {
@@ -112,9 +110,9 @@ class AlbumTest extends BaseTest {
                 .build();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
+
     // 1 – GET /albums (collection)
-    // ─────────────────────────────────────────────────────────────────────────
+
 
     @Test
     @Story("Get all albums")
@@ -131,9 +129,9 @@ class AlbumTest extends BaseTest {
                 .body("[0].title", not(emptyOrNullString()));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
+
     // 2 – GET /albums/{id} (happy path)
-    // ─────────────────────────────────────────────────────────────────────────
+
 
     @Test
     @Story("Get single album")
