@@ -1,4 +1,4 @@
-package com.json.Base;
+package com.json.base;
 
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -18,25 +18,20 @@ import static org.hamcrest.Matchers.lessThan;
 /**
  * BaseTest – the single shared foundation for every test class across
  * all 6 resource packages (Posts, Comments, Albums, Photos, Todos, Users).
- *
- * <p>
- * <b>Responsibilities (Single Responsibility Principle):</b>
- * <ul>
- * <li>Build and expose the {@link RequestSpecification} used by all tests</li>
- * <li>Build and expose the {@link ResponseSpecification} for common
- * assertions</li>
- * <li>Register logging and Allure filters once, globally</li>
- * </ul>
- *
- * <p>
- * <b>SOLID compliance:</b>
- * <ul>
- * <li><b>S</b> – Only manages shared setup; no test logic lives here</li>
- * <li><b>O</b> – Subclasses extend behaviour via @BeforeEach without modifying
- * this class</li>
- * <li><b>D</b> – Test classes depend on the RequestSpecification abstraction,
- * not a concrete HTTP client implementation</li>
- * </ul>
+
+
+ * Responsibilities (Single Responsibility Principle):
+
+ * Build and expose the {@link RequestSpecification} used by all tests
+ * Build and expose the {@link ResponseSpecification} for common
+ * assertions
+ * Register logging and Allure filters once, globally
+ * SOLID compliance:
+ *  – Only manages shared setup; no test logic lives here
+ *  – Subclasses extend behaviour via @BeforeEach without modifying
+ * this class<
+ *  – Test classes depend on the RequestSpecification abstraction,
+ * not a concrete HTTP client implementation
  */
 public abstract class BaseTest {
 
@@ -44,15 +39,12 @@ public abstract class BaseTest {
         protected static final Logger log = LoggerFactory.getLogger(BaseTest.class);
 
         /**
-         * Shared RequestSpecification – built once per JVM (static scope), then reused
-         * by every test via {@code given().spec(requestSpec)}.
-         * REST Assured clones it per request so it is safe for parallel execution.
+         * A pre-configured template for sending API requests. Every test uses this so all requests look and behave the same way
          */
         protected static RequestSpecification requestSpec;
 
         /**
-         * Shared ResponseSpecification – enforces the global response-time SLA.
-         * Individual test methods add further status-code and body assertions on top.
+         * A template for validating API responses. Checks that all responses come back within 3 seconds
          */
         protected static ResponseSpecification responseSpec;
 
@@ -66,6 +58,8 @@ public abstract class BaseTest {
          * One-time test-suite setup – executed before any test method in any subclass.
          * Static scope is intentional: the specification is stateless and thread-safe.
          */
+
+        //A setup method that runs once before any test starts, initializing the specs
         @BeforeAll
         static void globalSetUp() {
                 log.info("Initialising BaseTest – building shared RequestSpecification for all resources");
