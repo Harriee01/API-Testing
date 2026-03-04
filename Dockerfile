@@ -1,4 +1,4 @@
-# ──────────────────────────────────────────────────────────────────────────────
+
 # Dockerfile – Multi-stage build for the JSONPlaceholder API test suite
 #
 # Stage 1 (builder): downloads dependencies, compiles Java, runs the tests.
@@ -8,9 +8,9 @@
 # Usage:
 #   docker build -t api-tests .
 #   docker run --rm -v "$(pwd)/target:/app/target" api-tests
-# ──────────────────────────────────────────────────────────────────────────────
 
-# ── Stage 1: build & test ─────────────────────────────────────────────────────
+
+#  Stage 1: build & test
 FROM eclipse-temurin:21-jdk-alpine AS builder
 
 LABEL maintainer="QA Automation Team"
@@ -22,14 +22,14 @@ RUN apk add --no-cache maven
 # Set the working directory inside the container
 WORKDIR /app
 
-# ── Dependency layer (Docker cache optimisation) ──────────────────────────────
+#  Dependency layer (Docker cache optimisation) ─
 # Copy ONLY pom.xml first so Docker caches the dependency download step.
 # As long as pom.xml doesn't change, 'mvn dependency:go-offline' is skipped
 # on subsequent builds, saving minutes of network time.
 COPY pom.xml .
 RUN mvn --batch-mode dependency:go-offline -q
 
-# ── Source layer ──────────────────────────────────────────────────────────────
+#  Source layer
 # Now copy the full source tree (changes here don't invalidate the dep cache)
 COPY src/ src/
 
@@ -41,13 +41,13 @@ RUN mvn --batch-mode --no-transfer-progress clean test \
     # NOTE: '|| true' ensures the image layer succeeds even if tests fail,
     # so the results can still be extracted via 'docker cp' or volume mounts.
 
-# ── Stage 2: lightweight runtime ─────────────────────────────────────────────
-# Use JRE (not JDK) – smaller footprint, no compiler needed for re-runs.
-FROM eclipse-temurin:21-jre-alpine AS runner
+# Stage 2: lightweight runtime
+# Use JDK  – needed for Maven to compile test code when re-running.
+FROM eclipse-temurin:21-jdk-alpine AS runner
 
 LABEL description="REST Assured API automation suite – runtime stage"
 
-# Install Maven in the JRE image so 'mvn test' can be re-executed if needed
+# Install Maven in the JDK image so 'mvn test' can be re-executed with compilation
 RUN apk add --no-cache maven
 
 WORKDIR /app
@@ -58,5 +58,6 @@ COPY --from=builder /app /app
 COPY --from=builder /root/.m2 /root/.m2
 
 # Default command: run all tests and leave results in /app/target/allure-results
+# The runner stage should NOT run 'clean' to avoid permission issues with mounted volumes
 # Override with: docker run ... api-tests mvn test -Dtest=PostTests
-CMD ["mvn", "--batch-mode", "--no-transfer-progress", "clean", "test"]
+CMD ["mvn", "--batch-mode", "--no-transfer-progress", "test"]
