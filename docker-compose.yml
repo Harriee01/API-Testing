@@ -1,6 +1,6 @@
 version: "3.8"
 
-# ──────────────────────────────────────────────────────────────────────────────
+
 # docker-compose.yml – orchestrates two services:
 #
 #   api-tests  : builds the project and runs the full test suite
@@ -10,11 +10,11 @@ version: "3.8"
 #   docker-compose up --build           # run tests + open Allure UI
 #   docker-compose down                 # stop and remove containers
 #   docker-compose run api-tests        # run tests only (no Allure UI)
-# ──────────────────────────────────────────────────────────────────────────────
+
 
 services:
 
-  # ── 1. Test runner ───────────────────────────────────────────────────────────
+  # 1. Test runner
   api-tests:
     build:
       context: .
@@ -26,12 +26,12 @@ services:
       # Mount the host's target/ directory so Allure results survive
       # after the container exits and are readable by the allure service
       - ./target:/app/target
-    # Override the CMD to always run a clean test cycle
-    command: ["mvn", "--batch-mode", "--no-transfer-progress", "clean", "test"]
+    # Override the CMD to run tests (skip clean to avoid mount permission issues)
+    command: ["mvn", "--batch-mode", "--no-transfer-progress", "test"]
     # Signal Compose to start Allure AFTER tests finish
     # (Allure will serve whatever results are in ./target/allure-results)
 
-  # ── 2. Allure Report Server ──────────────────────────────────────────────────
+  # 2. Allure Report Server
   allure:
     image: frankescobar/allure-docker-service:latest
     container_name: allure-server
