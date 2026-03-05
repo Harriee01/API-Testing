@@ -189,7 +189,7 @@
                     <useModulePath>false</useModulePath>
                     <systemPropertyVariables>
                         <!-- Tell allure-junit5 listener where to write results -->
-                        <allure.results.directory>${allure.results.directory}</allure.results.directory>
+                        <allure.results.directory>/app/projects/api-tests/results</allure.results.directory>
                         <!-- Ensure consistent JVM timezone in CI -->
                         <user.timezone>UTC</user.timezone>
                     </systemPropertyVariables>
