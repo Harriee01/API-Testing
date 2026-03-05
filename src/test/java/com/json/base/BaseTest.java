@@ -1,6 +1,7 @@
 package com.json.base;
 
 import io.qameta.allure.restassured.AllureRestAssured;
+import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.filter.log.LogDetail;
@@ -9,6 +10,7 @@ import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +42,7 @@ public abstract class BaseTest {
 
         /**
          * A pre-configured template for sending API requests. Every test uses this so all requests look and behave the same way
+         * a type from REST Assured, representing a reusable specification for HTTP requests
          */
         protected static RequestSpecification requestSpec;
 
@@ -80,5 +83,11 @@ public abstract class BaseTest {
                                 .build();
 
                 log.info("BaseTest initialisation complete – base URI: {}", BASE_URI);
+        }
+
+        @AfterAll
+        static void globalTearDown() {
+                log.info("BaseTest teardown – no resources to clean up");
+                RestAssured.reset();
         }
 }
