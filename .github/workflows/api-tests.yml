@@ -92,7 +92,7 @@ jobs:
           status_icon = "✅" if (failed == 0 and errors == 0) else "❌"
 
           print("==================================")
-          print(f"SELENIUM UI TEST SUMMARY (Readable) {status_icon}")
+          print(f"API-TESTS SUMMARY (Readable) {status_icon}")
           print("==================================")
           print(f"Total tests : {total}")
           print(f"Passed      : {passed}")
@@ -149,7 +149,7 @@ jobs:
 
           if not files:
             text = (
-              "*Selenium UI Tests: FAIL ❌*\n"
+              "*API-Tests: FAIL ❌*\n"
               "I could not find test reports. This usually means tests did not run or the build stopped early.\n\n"
               f"Repo: `{repo}` | Branch: `{branch}`\n"
               f"Run details: {run_url}"
@@ -199,7 +199,7 @@ jobs:
           status = "PASS ✅" if (failed == 0 and errors == 0) else "FAIL ❌"
 
           lines = []
-          lines.append(f"*Selenium UI Tests: {status}*")
+          lines.append(f"*API-Tests: {status}*")
           lines.append(f"Total: *{total}* | Passed: *{passed}* | Failed: *{failed}* | Errors: *{errors}* | Skipped: *{skipped}*")
           lines.append("")
 
