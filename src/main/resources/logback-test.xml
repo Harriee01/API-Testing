@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  logback-test.xml – Logback configuration active ONLY during tests.
+  Placed in src/main/resources so it is on the test classpath via Maven.
+
+  Key decisions:
+  - Level INFO for our framework packages (avoids noise in CI output)
+  - Level WARN for third-party libraries (REST Assured, Apache HTTP client, etc.)
+  - Single CONSOLE appender with a compact, coloured pattern for easy reading
+  - No file appender in tests: Allure captures the important artefacts instead
+-->
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <!--
+      ANSI colour output: makes INFO/WARN/ERROR immediately distinguishable
+      in any terminal that supports ANSI escape codes (IntelliJ, macOS, Linux).
+      CI runners (GitHub Actions) also support ANSI from Logback 1.3+.
+    -->
+    <conversionRule conversionWord="clr"
+                    converterClass="ch.qos.logback.core.pattern.color.ANSIConstants"/>
+
+    <!-- ── Appender ─────────────────────────────────────────────────────── -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!--
+              Pattern breakdown:
+              %d{HH:mm:ss.SSS}   – timestamp (hours:minutes:seconds.millis)
+              %-5level           – log level, left-padded to 5 chars (INFO, WARN, …)
+              [%thread]          – thread name (useful for parallel test detection)
+              %logger{36}        – logger class name, truncated to 36 chars
+              %msg%n             – the actual log message + newline
+            -->
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ── Framework loggers ─────────────────────────────────────────────── -->
+
+    <!-- Our own framework: INFO shows step summaries without debug noise -->
+    <logger name="com.json" level="INFO"/>
+
+    <!-- REST Assured internal: WARN prevents verbose HTTP wire logging
+         (we already attach req/res via AllureRestAssured filter) -->
+    <logger name="io.restassured" level="WARN"/>
+
+    <!-- Apache HttpClient (used internally by REST Assured): suppress wire logs -->
+    <logger name="org.apache.http" level="WARN"/>
+
+    <!-- Allure internals: WARN – only emit on actual reporting problems -->
+    <logger name="io.qameta.allure" level="WARN"/>
+
+    <!-- DataFaker: WARN – suppress locale-loading chatter -->
+    <logger name="net.datafaker" level="WARN"/>
+
+    <!-- ── Root logger ────────────────────────────────────────────────────── -->
+    <!-- Everything not explicitly configured above falls back to INFO -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

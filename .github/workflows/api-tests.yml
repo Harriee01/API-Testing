@@ -1,4 +1,4 @@
-name: CI - Selenium UI Tests
+name: CI - API - Tests
 
 on:
   push:

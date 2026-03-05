@@ -1,0 +1,48 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "User",
+    "description": "JSON Schema for a single JSONPlaceholder user resource",
+    "type": "object",
+    "required": [
+        "id",
+        "name",
+        "username",
+        "email"
+    ],
+    "properties": {
+        "id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Unique user identifier"
+        },
+        "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Full display name"
+        },
+        "username": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Short, unique handle"
+        },
+        "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User's email address"
+        },
+        "address": {
+            "type": "object",
+            "description": "Nested address object (not fully modelled here)"
+        },
+        "phone": {
+            "type": "string"
+        },
+        "website": {
+            "type": "string"
+        },
+        "company": {
+            "type": "object",
+            "description": "Nested company information"
+        }
+    }
+}

@@ -1,0 +1,41 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Comment",
+    "description": "JSON Schema for a single /comments resource from JSONPlaceholder",
+    "type": "object",
+    "required": [
+        "postId",
+        "id",
+        "name",
+        "email",
+        "body"
+    ],
+    "properties": {
+        "postId": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The id of the parent post"
+        },
+        "id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Server-assigned unique comment id"
+        },
+        "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Display name / subject heading of the comment"
+        },
+        "email": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Email address of the comment author"
+        },
+        "body": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Full body text of the comment"
+        }
+    },
+    "additionalProperties": false
+}

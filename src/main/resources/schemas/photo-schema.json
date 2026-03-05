@@ -1,0 +1,41 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Photo",
+    "description": "JSON Schema for a single /photos resource from JSONPlaceholder",
+    "type": "object",
+    "required": [
+        "albumId",
+        "id",
+        "title",
+        "url",
+        "thumbnailUrl"
+    ],
+    "properties": {
+        "albumId": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The id of the parent album"
+        },
+        "id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Server-assigned unique photo id"
+        },
+        "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Title or description of the photo"
+        },
+        "url": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Full-size image URL"
+        },
+        "thumbnailUrl": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Thumbnail image URL"
+        }
+    },
+    "additionalProperties": false
+}
