@@ -1,52 +1,30 @@
-version: "3.8"
-
-
-# docker-compose.yml – orchestrates two services:
-#
-#   api-tests  : builds the project and runs the full test suite
-#   allure     : serves the interactive Allure HTML report on http://localhost:5050
-#
-# Usage:
-#   docker-compose up --build           # run tests + open Allure UI
-#   docker-compose down                 # stop and remove containers
-#   docker-compose run api-tests        # run tests only (no Allure UI)
-
+version: "3.9"
 
 services:
 
-  # 1. Test runner
   api-tests:
     build:
       context: .
       dockerfile: Dockerfile
-      # Use the 'runner' stage so we get a lean image
       target: runner
     container_name: api-tests-runner
     volumes:
-      # Mount the host's target/ directory so Allure results survive
-      # after the container exits and are readable by the allure service
-      - ./target:/app/target
-    # Override the CMD to run tests (skip clean to avoid mount permission issues)
-    command: ["mvn", "--batch-mode", "--no-transfer-progress", "test"]
-    # Signal Compose to start Allure AFTER tests finish
-    # (Allure will serve whatever results are in ./target/allure-results)
+      - allure-projects:/app/projects
+    command: mvn test
 
-  # 2. Allure Report Server
+
   allure:
     image: frankescobar/allure-docker-service:latest
     container_name: allure-server
-    # The Allure server watches allure-results for new files and auto-updates
     ports:
-      - "5050:5050"   # Allure UI → open http://localhost:5050 in your browser
+      - "5050:5050"
     environment:
-      # Tell the Allure service where result files are stored inside its container
       CHECK_RESULTS_EVERY_SECONDS: 5
-      KEEP_HISTORY: 1              # preserve trend history across runs
+      KEEP_HISTORY: 1
+      AUTO_GENERATE_REPORTS: "true"
     volumes:
-      # Share the same results directory so Allure can read what the test job wrote
-      - ./target/allure-results:/app/allure-results
-      - ./target/allure-report:/app/default-reports
-    depends_on:
-      # Wait for the test runner to finish before starting the report server
-      - api-tests
+      - allure-projects:/app/projects
     restart: unless-stopped
+
+volumes:
+  allure-projects:
